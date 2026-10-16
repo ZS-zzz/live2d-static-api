@@ -1,15 +1,5 @@
 [
 	{
-		"modelIntroduce": "星野 Hoshino ~",
-		"modelPath": "星野",
-		"type": "cubism4"
-	},
-	{
-		"modelIntroduce": "《原神》胡桃 Hu Tao ~",
-		"modelPath": "原神",
-		"type": "cubism4"
-	},
-	{
 		"modelIntroduce": "来自 Bilibili Live 的 22 ~",
 		"modelPath": "bilibili-live/22",
 		"type": "cubism2"
@@ -35,11 +25,6 @@
 		"type": "cubism2"
 	},
 	{
-		"modelIntroduce": "《原神》纳西妲 Nahida ~",
-		"modelPath": "Nahida_1080",
-		"type": "cubism4"
-	},
-	{
 		"modelIntroduce": "来自 Potion Maker 的 Pio ~",
 		"modelPath": "Potion-Maker/Pio",
 		"type": "cubism2"
@@ -53,10 +38,5 @@
 		"modelIntroduce": "XiaoMai ！这里是 XiaoMai ~ ~",
 		"modelPath": "xiaomai/custom",
 		"type": "cubism2"
-	},
-	{
-		"modelIntroduce": "小月 Xiaoyue ~",
-		"modelPath": "xiaoyue",
-		"type": "cubism4"
 	}
 ]
