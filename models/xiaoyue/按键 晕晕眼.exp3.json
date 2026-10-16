@@ -1,0 +1,41 @@
+{
+    "Type": "Live2D Expression",
+    "IsModelCustomizationExpression": false,
+    "Parameters": [
+        {
+            "Id": "AJYGGYC",
+            "Value": 1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "AJAX",
+            "Value": 0.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "AJXX",
+            "Value": 0.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "AJYYY",
+            "Value": 1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "AJZBYC",
+            "Value": 1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "AJZ1",
+            "Value": 1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "AJZ2",
+            "Value": 0.0,
+            "Blend": "Add"
+        }
+    ]
+}

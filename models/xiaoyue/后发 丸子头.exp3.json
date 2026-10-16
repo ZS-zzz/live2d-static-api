@@ -1,0 +1,31 @@
+{
+    "Type": "Live2D Expression",
+    "IsModelCustomizationExpression": false,
+    "Parameters": [
+        {
+            "Id": "FF1",
+            "Value": 0.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "FF2",
+            "Value": 1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "FF3",
+            "Value": 0.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "FF4",
+            "Value": 0.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "FF5",
+            "Value": 0.0,
+            "Blend": "Add"
+        }
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "Type": "Live2D Expression",
+    "IsModelCustomizationExpression": false,
+    "Parameters": [
+        {
+            "Id": "QF1",
+            "Value": -1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "QF2",
+            "Value": 1.0,
+            "Blend": "Add"
+        },
+        {
+            "Id": "QF3",
+            "Value": 0.0,
+            "Blend": "Add"
+        }
+    ]
+}

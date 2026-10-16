@@ -72,6 +72,8 @@ apiPath="https://raw.githubusercontent.com/evgo2017/live2d-static-api/main/index
 | **配置详情** | `/<modelPath>/<texturesId>.json` | 模型完整配置 | 最终由 `loadlive2d` 加载的文件 |
 
 > **注**：`modelPath` 与 `texturesId` 均从上一级 JSON 响应中动态获取。默认皮肤 ID 通常为 `default`。
+>
+> **注**：`models.json` 中每一项还带有 `type` 字段，取值为 `cubism2` 或 `cubism4`，用于判断该模型需要哪一种运行时。Cubism 4 模型固定只有 `default` 一种皮肤。
 
 ---
 
@@ -89,11 +91,17 @@ apiPath="https://raw.githubusercontent.com/evgo2017/live2d-static-api/main/index
 │      ├─textures.json # 该模型的皮肤列表
 │      └─<SkinID>.json # 具体的模型皮肤配置文件
 │
-└─models              # 【开发环境】原始模型资源，放置 .moc, .mtn, 贴图文件
-    └─<ModelPath>
-        ├─model.json  # 每一个模型必须包含的原始模板配置文件
-        ├─textures    # 贴图资源
-        └─motions     # 动作/音频资源
+└─models              # 【开发环境】原始模型资源，放置模型文件与贴图
+    ├─<ModelPath>     # Cubism 2：必须包含 model.json
+    │   ├─model.json  # 模型模板配置文件，model 字段指向 .moc
+    │   ├─textures    # 贴图资源
+    │   └─motions     # 动作/音频资源
+    │
+    └─<ModelPath>     # Cubism 4：必须包含 *.model3.json
+        ├─<Name>.model3.json  # 模型模板配置文件，FileReferences.Moc 指向 .moc3
+        ├─<Name>.moc3
+        ├─<Name>.physics3.json
+        └─<Name>.4096/texture_*.png
 ```
 
 详细：
@@ -138,8 +146,10 @@ apiPath="https://raw.githubusercontent.com/evgo2017/live2d-static-api/main/index
 
 ### 编译逻辑简述
 执行 `npm run build` 后，`build.js` 脚本会：
-1.  遍历 `models` 文件夹。
-2.  解析每个模型下的 `model.json`。
-3.  根据该模型的皮肤（纹理）数量，自动衍生生成 `indexes` 下的多个对应 JSON 文件。
-4.  将复杂的绝对路径转化为相对于 `apiPath` 的正确路径。
+1.  遍历 `models` 文件夹，按目录内容自动判定模型格式：
+    - 存在 `model.json` → 按 **Cubism 2** 处理；
+    - 存在 `*.model3.json` → 按 **Cubism 4** 处理。
+2.  解析模型模板文件，并写入 `indexes/models.json`（含 `modelIntroduce`、`modelPath`、`type`）。
+3.  **Cubism 2**：根据该模型的皮肤（纹理）数量，自动衍生生成 `indexes` 下的多个对应 JSON 文件；**Cubism 4**：生成单个 `default.json`。
+4.  将模型内部的相对路径统一转化为相对于 `apiPath` 的正确路径，并生成 `textures.json`。
 

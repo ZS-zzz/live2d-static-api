@@ -1,34 +1,62 @@
 [
 	{
-		"modelIntroduce": "来自 Bilibili Live 的 22 ~",
-		"modelPath": "bilibili-live/33"
+		"modelIntroduce": "星野 Hoshino ~",
+		"modelPath": "星野",
+		"type": "cubism4"
+	},
+	{
+		"modelIntroduce": "《原神》胡桃 Hu Tao ~",
+		"modelPath": "原神",
+		"type": "cubism4"
 	},
 	{
 		"modelIntroduce": "来自 Bilibili Live 的 22 ~",
-		"modelPath": "bilibili-live/22"
+		"modelPath": "bilibili-live/22",
+		"type": "cubism2"
+	},
+	{
+		"modelIntroduce": "来自 Bilibili Live 的 22 ~",
+		"modelPath": "bilibili-live/33",
+		"type": "cubism2"
 	},
 	{
 		"modelIntroduce": "Nep! Nep! 超次元游戏：海王星 系列",
-		"modelPath": "HyperdimensionNeptunia/blanc_normal"
+		"modelPath": "HyperdimensionNeptunia/blanc_normal",
+		"type": "cubism2"
 	},
 	{
 		"modelIntroduce": "Nep! Nep! 超次元游戏：海王星 系列",
-		"modelPath": "HyperdimensionNeptunia/noir"
+		"modelPath": "HyperdimensionNeptunia/nepnep",
+		"type": "cubism2"
 	},
 	{
 		"modelIntroduce": "Nep! Nep! 超次元游戏：海王星 系列",
-		"modelPath": "HyperdimensionNeptunia/nepnep"
+		"modelPath": "HyperdimensionNeptunia/noir",
+		"type": "cubism2"
+	},
+	{
+		"modelIntroduce": "《原神》纳西妲 Nahida ~",
+		"modelPath": "Nahida_1080",
+		"type": "cubism4"
 	},
 	{
 		"modelIntroduce": "来自 Potion Maker 的 Pio ~",
-		"modelPath": "Potion-Maker/Pio"
-	},
-	{
-		"modelIntroduce": "XiaoMai ！这里是 XiaoMai ~ ~",
-		"modelPath": "xiaomai/custom"
+		"modelPath": "Potion-Maker/Pio",
+		"type": "cubism2"
 	},
 	{
 		"modelIntroduce": "Shizuku Talk ！这里是 Shizuku ~",
-		"modelPath": "ShizukuTalk/shizuku-48"
+		"modelPath": "ShizukuTalk/shizuku-48",
+		"type": "cubism2"
+	},
+	{
+		"modelIntroduce": "XiaoMai ！这里是 XiaoMai ~ ~",
+		"modelPath": "xiaomai/custom",
+		"type": "cubism2"
+	},
+	{
+		"modelIntroduce": "小月 Xiaoyue ~",
+		"modelPath": "xiaoyue",
+		"type": "cubism4"
 	}
 ]

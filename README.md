@@ -44,12 +44,26 @@
 -   **全平台兼容**：适配所有前端构建工具及静态平台。
 -   **CDN 友好**：支持一键发布到 NPM 并通过 `unpkg` / `jsdelivr` 加速，国内访问极速稳定。
 -   **灵活可定制**：一键脚本，轻松生成属于你自己的模型索引。
+-   **双格式支持**：同时收录 Cubism 2（`model.json` + `.moc`）与 Cubism 4（`*.model3.json` + `.moc3`）模型。
 
 ---
 
 ## 🛠 进阶：修改与生成模型
 
 如果你想新增模型、修改服装或调整配置，只需在 `models` 文件夹中操作，然后运行编译脚本：
+
+### 支持的模型格式
+
+`build.js` 会自动识别目录格式，两种模型可以混放：
+
+| 格式 | 目录内必须包含 | 生成结果 |
+| :--- | :--- | :--- |
+| **Cubism 2** | `model.json`（`model` 字段指向 `.moc`）+ `textures/<部件>/*.png` | 按部件组合派生多套皮肤 JSON |
+| **Cubism 4** | `*.model3.json`（`FileReferences.Moc` 指向 `.moc3`） | 生成 `default.json`，只有一套皮肤 |
+
+> **关于 Cubism 4**：其模型定义会原样转义为 `default.json`。若源文件未声明 `Expressions` / `Motions`，编译时会按目录内的 `*.exp3.json`、`*.motion3.json` 自动补全（动作统一归入 `Idle` 分组）。可选在 `*.model3.json` 顶层加一个 `modelIntroduce` 字段作为模型介绍，缺失时以文件夹名代替。
+>
+> **注意**：Cubism 4 模型需要 Cubism 4 运行时渲染（如 `live2dcubismcore.min.js` + `pixi-live2d-display`），经典的 `live2d.min.js` 只能渲染 Cubism 2 模型。可通过 `models.json` 里的 `type` 字段（`cubism2` / `cubism4`）区分。
 
 ### 编译指令
 ```bash
@@ -65,7 +79,7 @@ node build.js fromBasePath=models toBasePath=indexes isCompress=true
 | :--- | :--- | :--- |
 | `fromBasePath` | 模型原始资源路径 | `models` |
 | `toBasePath` | 生成的索引输出路径 | `indexes` |
-| `isCompress` | 生成的 JSON 索引是否压缩 | `true` |
+| `isCompress` | 生成的 JSON 索引是否压缩 | `false` |
 
 ---
 

@@ -11,12 +11,21 @@ const fromBasePath = buildOptions.fromBasePath
 const toBasePath = buildOptions.toBasePath
 const isCompress = buildOptions.isCompress
 
+// Cubism 2 模型：目录内有 model.json，且 model 字段指向 .moc
 const modelTemplateJsonFileName = 'model.json'
+// Cubism 4 模型：目录内有 *.model3.json，且 FileReferences.Moc 指向 .moc3
+const model3JsonSuffix = '.model3.json'
 const modelTexturesFolderPath = 'textures'
 
 const modelsIndexJsonFileName = 'models.json'
 const textureDefaultJsonFileName = 'default.json'
 const texturesIndexJsonFileName = 'textures.json'
+
+const modelTypeCubism2 = 'cubism2'
+const modelTypeCubism4 = 'cubism4'
+
+const expressionSuffix = '.exp3.json'
+const motionSuffix = '.motion3.json'
 
 class Helper {
   static async ensureExistFolder(folderPath) {
@@ -47,6 +56,12 @@ class Helper {
     return JSON.stringify(json, null, isCompress ? '' : '\t')
   }
 
+  // 把「相对模型目录的路径」转成「相对索引目录的路径」，例如
+  // models/星野/星野.moc3 -> ../../models/星野/星野.moc3
+  static toRelativePath(fromModelPath, toModelPath, filePath) {
+    return path.relative(toModelPath, path.normalize(`${fromModelPath}/${filePath}`))
+  }
+
   static factorial(rest, result = [], detail = []) {
     if (rest.length === 0) {
       result.push(detail)
@@ -67,26 +82,26 @@ class Helper {
 class Setting {
   static updateModel(fromModelPath, toModelPath, json) {
     if (json.model) {
-      json.model = path.relative(toModelPath, path.normalize(`${fromModelPath}/${json.model}`))
+      json.model = Helper.toRelativePath(fromModelPath, toModelPath, json.model)
     }
   }
 
   static updatePose(fromModelPath, toModelPath, json) {
     if (json.pose) {
-      json.pose = path.relative(toModelPath, path.normalize(`${fromModelPath}/${json.pose}`))
+      json.pose = Helper.toRelativePath(fromModelPath, toModelPath, json.pose)
     }
   }
 
   static updatePhysics(fromModelPath, toModelPath, json) {
     if (json.physics) {
-      json.physics = path.relative(toModelPath, path.normalize(`${fromModelPath}/${json.physics}`))
+      json.physics = Helper.toRelativePath(fromModelPath, toModelPath, json.physics)
     }
   }
 
   static updateExpressions(fromModelPath, toModelPath, json) {
     if (json.expressions) {
       json.expressions.forEach(({ file }, index, array) => {
-        array[index].file = path.relative(toModelPath, path.normalize(`${fromModelPath}/${file}`))
+        array[index].file = Helper.toRelativePath(fromModelPath, toModelPath, file)
       })
     }
   }
@@ -96,10 +111,10 @@ class Setting {
       Object.values(json.motions).forEach(groups => {
         groups.forEach((motion, index, array) => {
           if (motion.file) {
-            array[index].file = path.relative(toModelPath, path.normalize(`${fromModelPath}/${motion.file}`))
+            array[index].file = Helper.toRelativePath(fromModelPath, toModelPath, motion.file)
           }
           if (motion.sound) {
-            array[index].sound = path.relative(toModelPath, path.normalize(`${fromModelPath}/${motion.sound}`))
+            array[index].sound = Helper.toRelativePath(fromModelPath, toModelPath, motion.sound)
           }
         })
       })
@@ -108,8 +123,34 @@ class Setting {
 
   static updateTextures(fromModelPath, toModelPath, json, textures = []) {
     json.textures = textures.map(texture => {
-      return path.relative(toModelPath, path.normalize(`${fromModelPath}/${texture}`))
+      return Helper.toRelativePath(fromModelPath, toModelPath, texture)
     })
+  }
+
+  // Cubism 4：FileReferences 下的字符串（含数组、嵌套对象里的）基本都是相对模型目录的文件路径，
+  // 但 Expressions[].Name 是表情显示名，必须原样保留
+  static updateFileReferences(fromModelPath, toModelPath, node, skipKeys = ['Name']) {
+    if (typeof node === 'string') {
+      return Helper.toRelativePath(fromModelPath, toModelPath, node)
+    }
+
+    if (Array.isArray(node)) {
+      return node.map(item => Setting.updateFileReferences(fromModelPath, toModelPath, item, skipKeys))
+    }
+
+    if (node && typeof node === 'object') {
+      const result = {}
+      Object.keys(node).forEach(key => {
+        if (skipKeys.includes(key)) {
+          result[key] = node[key]
+          return
+        }
+        result[key] = Setting.updateFileReferences(fromModelPath, toModelPath, node[key], skipKeys)
+      })
+      return result
+    }
+
+    return node
   }
 }
 
@@ -119,27 +160,44 @@ async function init() {
   await Helper.deleteFolder(toBasePath)
   await Helper.ensureExistFolder(toBasePath)
 
-  const modelPaths = await createModelsIndexJsonFile()
+  const models = await createModelsIndexJsonFile()
 
-  modelPaths.map(async ({ modelPath }) => {
-    console.log(`开始转换：${modelPath}`)
+  await Promise.all(models.map(async model => {
+    console.log(`开始转换：${model.modelPath}`)
 
-    const fromModelPath = `${fromBasePath}/${modelPath}`
-    const toModelPath = `${toBasePath}/${modelPath}`
+    if (model.type === modelTypeCubism4) {
+      await createCubism4IndexJsonFiles(model)
+    } else {
+      await createCubism2IndexJsonFiles(model)
+    }
 
-    await Helper.ensureExistFolder(toModelPath)
-
-    await createTextureJsonFiles(fromModelPath, toModelPath)
-    await createTexturesIndexJsonFile(toModelPath)
-
-    console.log(`转换完成：${modelPath}`)
-  })
+    console.log(`转换完成：${model.modelPath}`)
+  }))
 }
 
 async function createModelsIndexJsonFile() {
-  const modelPaths = await getAllModelPaths()
-  await fs.writeFile(`${toBasePath}/${modelsIndexJsonFileName}`, Helper.stringify(modelPaths))
-  return modelPaths
+  const models = await getAllModelPaths()
+
+  const modelsIndex = models.map(({ modelIntroduce, modelPath, type }) => ({
+    modelIntroduce,
+    modelPath,
+    type
+  }))
+
+  await fs.writeFile(`${toBasePath}/${modelsIndexJsonFileName}`, Helper.stringify(modelsIndex))
+  return models
+}
+
+// ---------- Cubism 2 ----------
+
+async function createCubism2IndexJsonFiles({ modelPath }) {
+  const fromModelPath = `${fromBasePath}/${modelPath}`
+  const toModelPath = `${toBasePath}/${modelPath}`
+
+  await Helper.ensureExistFolder(toModelPath)
+
+  await createTextureJsonFiles(fromModelPath, toModelPath)
+  await createTexturesIndexJsonFile(toModelPath)
 }
 
 async function createTexturesIndexJsonFile(toModelPath) {
@@ -203,35 +261,105 @@ async function getTextureGroups(fromModelPath) {
   return textureGroups
 }
 
-async function getAllModelPaths() {
-  const modelPaths = []
-  await fillModelPath(fromBasePath)
-  return modelPaths
+// ---------- Cubism 4 ----------
 
-  async function fillModelPath(path) {
-    const modelTemplateJsonFilePath = `${path}/${modelTemplateJsonFileName}`
-    try {
-      const stat = await fs.stat(modelTemplateJsonFilePath)
-      if (stat.isFile()) {
-        modelPaths.push({
-          modelIntroduce: JSON.parse(await fs.readFile(modelTemplateJsonFilePath, 'utf-8')).modelIntroduce,
-          modelPath: path.slice(path.indexOf('/') + 1)
-        })
-        return
+async function createCubism4IndexJsonFiles({ modelPath, model3JsonFileName, fileNames }) {
+  const fromModelPath = `${fromBasePath}/${modelPath}`
+  const toModelPath = `${toBasePath}/${modelPath}`
+
+  await Helper.ensureExistFolder(toModelPath)
+
+  const model3Json = JSON.parse(await fs.readFile(`${fromModelPath}/${model3JsonFileName}`, 'utf-8'))
+
+  const defaultTextureJson = createCubism4DefaultTextureJson(model3Json, fromModelPath, toModelPath, fileNames)
+
+  await fs.writeFile(`${toModelPath}/${textureDefaultJsonFileName}`, Helper.stringify(defaultTextureJson))
+
+  // Cubism 4 的贴图在 model3.json 中一次性声明，不按部件派生多套皮肤，因此只有 default 一种
+  await fs.writeFile(`${toModelPath}/${texturesIndexJsonFileName}`, Helper.stringify([path.parse(textureDefaultJsonFileName).name]))
+}
+
+function createCubism4DefaultTextureJson(model3Json, fromModelPath, toModelPath, fileNames = []) {
+  const json = JSON.parse(JSON.stringify(model3Json))
+
+  const fileReferences = json.FileReferences || (json.FileReferences = {})
+
+  // 源模型未声明表情时，按目录里的 *.exp3.json 自动补全
+  if (!fileReferences.Expressions) {
+    const expressions = fileNames.filter(name => name.endsWith(expressionSuffix))
+    if (expressions.length) {
+      fileReferences.Expressions = expressions.map(name => ({
+        Name: name.slice(0, -expressionSuffix.length),
+        File: name
+      }))
+    }
+  }
+
+  // 源模型未声明动作时，按目录里的 *.motion3.json 自动归入 Idle 分组
+  if (!fileReferences.Motions) {
+    const motions = fileNames.filter(name => name.endsWith(motionSuffix))
+    if (motions.length) {
+      fileReferences.Motions = {
+        Idle: motions.map(name => ({ File: name }))
       }
+    }
+  }
+
+  json.FileReferences = Setting.updateFileReferences(fromModelPath, toModelPath, fileReferences)
+
+  return json
+}
+
+// ---------- 模型扫描 ----------
+
+async function getAllModelPaths() {
+  const models = []
+  await fillModelPath(fromBasePath)
+  return models
+
+  async function fillModelPath(dirPath) {
+    let dirents
+    try {
+      dirents = await fs.readdir(dirPath, { withFileTypes: true })
     } catch (e) {
-      // do nothing
+      return
     }
 
-    const dirents = await fs.readdir(path, { withFileTypes: true })
+    // 固定顺序，保证 models.json 稳定可复现
+    dirents.sort((a, b) => a.name.localeCompare(b.name))
 
-    await Promise.all(dirents.map(async dirent => {
-      if (!dirent.isDirectory()) {
-        return
+    const fileNames = dirents.filter(dirent => dirent.isFile()).map(dirent => dirent.name)
+
+    // Cubism 2
+    if (fileNames.includes(modelTemplateJsonFileName)) {
+      const json = JSON.parse(await fs.readFile(`${dirPath}/${modelTemplateJsonFileName}`, 'utf-8'))
+      models.push({
+        type: modelTypeCubism2,
+        modelIntroduce: json.modelIntroduce,
+        modelPath: dirPath.slice(fromBasePath.length + 1)
+      })
+      return
+    }
+
+    // Cubism 4
+    const model3JsonFileName = fileNames.find(name => name.endsWith(model3JsonSuffix))
+    if (model3JsonFileName) {
+      const json = JSON.parse(await fs.readFile(`${dirPath}/${model3JsonFileName}`, 'utf-8'))
+      models.push({
+        type: modelTypeCubism4,
+        modelIntroduce: json.modelIntroduce || dirPath.slice(dirPath.lastIndexOf('/') + 1),
+        modelPath: dirPath.slice(fromBasePath.length + 1),
+        model3JsonFileName,
+        fileNames
+      })
+      return
+    }
+
+    for (const dirent of dirents) {
+      if (dirent.isDirectory()) {
+        await fillModelPath(`${dirPath}/${dirent.name}`)
       }
-
-      await fillModelPath(`${path}/${dirent.name}`)
-    }))
+    }
   }
 }
 

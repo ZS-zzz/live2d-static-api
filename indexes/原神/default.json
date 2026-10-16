@@ -1,0 +1,63 @@
+{
+	"modelIntroduce": "《原神》胡桃 Hu Tao ~",
+	"Version": 3,
+	"FileReferences": {
+		"Moc": "../../models/原神/Hu Tao.moc3",
+		"Textures": [
+			"../../models/原神/Hu Tao.8192/texture_00.png",
+			"../../models/原神/Hu Tao.8192/texture_01.png",
+			"../../models/原神/Hu Tao.8192/texture_02.png"
+		],
+		"Physics": "../../models/原神/Hu Tao.physics3.json",
+		"DisplayInfo": "../../models/原神/Hu Tao.cdi3.json",
+		"Expressions": [
+			{
+				"Name": "Angry",
+				"File": "../../models/原神/Angry.exp3.json"
+			},
+			{
+				"Name": "EyeshineOff",
+				"File": "../../models/原神/EyeshineOff.exp3.json"
+			},
+			{
+				"Name": "Ghost",
+				"File": "../../models/原神/Ghost.exp3.json"
+			},
+			{
+				"Name": "GhostChange",
+				"File": "../../models/原神/GhostChange.exp3.json"
+			},
+			{
+				"Name": "PupilShrink",
+				"File": "../../models/原神/PupilShrink.exp3.json"
+			},
+			{
+				"Name": "SadLock",
+				"File": "../../models/原神/SadLock.exp3.json"
+			},
+			{
+				"Name": "Shadow",
+				"File": "../../models/原神/Shadow.exp3.json"
+			},
+			{
+				"Name": "SmileLock",
+				"File": "../../models/原神/SmileLock.exp3.json"
+			}
+		]
+	},
+	"Groups": [
+		{
+			"Target": "Parameter",
+			"Name": "LipSync",
+			"Ids": []
+		},
+		{
+			"Target": "Parameter",
+			"Name": "EyeBlink",
+			"Ids": [
+				"ParamEyeLOpen",
+				"ParamEyeROpen"
+			]
+		}
+	]
+}
